@@ -4,7 +4,7 @@ add_library(GGPO
 	${GGPO_LIB_SRC}
 )
 
-add_common_flags(GGPO)
+#add_common_flags(GGPO)
 
 target_include_directories(GGPO PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
