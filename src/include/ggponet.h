@@ -235,6 +235,11 @@ typedef struct {
     * structure above for more information.
     */
    bool (__cdecl *on_event)(GGPOEvent *info);
+
+   /*
+    * set_last_confirmed - called when we've confirmed that a frame definitely happened
+    */
+   bool (__cdecl *set_last_confirmed)(int frame);
 } GGPOSessionCallbacks;
 
 /*

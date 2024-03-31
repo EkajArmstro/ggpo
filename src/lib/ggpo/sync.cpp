@@ -45,6 +45,8 @@ Sync::SetLastConfirmedFrame(int frame)
          _input_queues[i].DiscardConfirmedFrames(frame - 1);
       }
    }
+
+   _callbacks.set_last_confirmed(frame);
 }
 
 bool
