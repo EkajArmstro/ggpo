@@ -201,7 +201,7 @@ typedef struct {
     * length into the *len parameter.  Optionally, the client can compute
     * a checksum of the data and store it in the *checksum argument.
     */
-   bool (__cdecl *save_game_state)(unsigned char **buffer, int *len, int *checksum, int frame);
+   bool (__cdecl *save_game_state)(int frame, int index, int *checksum);
 
    /*
     * load_game_state - GGPO.net will call this function at the beginning
@@ -210,20 +210,14 @@ typedef struct {
     * should make the current game state match the state contained in the
     * buffer.
     */
-   bool (__cdecl *load_game_state)(unsigned char *buffer, int len);
+   bool (__cdecl *load_game_state)(int frame, int index);
 
    /*
     * log_game_state - Used in diagnostic testing.  The client should use
     * the ggpo_log function to write the contents of the specified save
     * state in a human readible form.
     */
-   bool (__cdecl *log_game_state)(char *filename, unsigned char *buffer, int len);
-
-   /*
-    * free_buffer - Frees a game state allocated in save_game_state.  You
-    * should deallocate the memory contained in the buffer.
-    */
-   void (__cdecl *free_buffer)(void *buffer);
+   bool (__cdecl *log_game_state)(char *filename, int frame, int index);
 
    /*
     * advance_frame - Called during a rollback.  You should advance your game

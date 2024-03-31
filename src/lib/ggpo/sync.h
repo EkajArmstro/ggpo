@@ -64,11 +64,10 @@ protected:
    friend SyncTestBackend;
 
    struct SavedFrame {
-      byte    *buf;
-      int      cbuf;
       int      frame;
+      int      index;
       int      checksum;
-      SavedFrame() : buf(NULL), cbuf(0), frame(-1), checksum(0) { }
+      SavedFrame() : frame(-1), index(-1), checksum(0) { }
    };
    struct SavedState {
       SavedFrame frames[MAX_PREDICTION_FRAMES + 2];

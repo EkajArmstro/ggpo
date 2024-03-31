@@ -101,10 +101,10 @@ SyncTestBackend::SyncInput(void *values,
 
 GGPOErrorCode
 SyncTestBackend::IncrementFrame(void)
-{  
+{
    _sync.IncrementFrame();
    _current_input.erase();
-   
+
    Log("End of frame(%d)...\n", _sync.GetFrameCount());
    EndLog();
 
@@ -119,9 +119,7 @@ SyncTestBackend::IncrementFrame(void)
    SavedInfo info;
    info.frame = frame;
    info.input = _last_input;
-   info.cbuf = _sync.GetLastSavedFrame().cbuf;
-   info.buf = (char *)malloc(info.cbuf);
-   memcpy(info.buf, _sync.GetLastSavedFrame().buf, info.cbuf);
+   info.index = _sync.GetLastSavedFrame().index;
    info.checksum = _sync.GetLastSavedFrame().checksum;
    _saved_frames.push(info);
 
@@ -148,7 +146,6 @@ SyncTestBackend::IncrementFrame(void)
             RaiseSyncError("Checksum for frame %d does not match saved (%d != %d)", frame, checksum, info.checksum);
          }
          printf("Checksum %08d for frame %d matches.\n", checksum, info.frame);
-         free(info.buf);
       }
       _last_verified = frame;
       _rollingback = false;
@@ -210,8 +207,8 @@ SyncTestBackend::LogSaveStates(SavedInfo &info)
 {
    char filename[MAX_PATH];
    sprintf_s(filename, ARRAY_SIZE(filename), "synclogs\\state-%04d-original.log", _sync.GetFrameCount());
-   _callbacks.log_game_state(filename, (unsigned char *)info.buf, info.cbuf);
+   _callbacks.log_game_state(filename, info.frame, info.index);
 
    sprintf_s(filename, ARRAY_SIZE(filename), "synclogs\\state-%04d-replay.log", _sync.GetFrameCount());
-   _callbacks.log_game_state(filename, _sync.GetLastSavedFrame().buf, _sync.GetLastSavedFrame().cbuf);
+   _callbacks.log_game_state(filename, _sync.GetLastSavedFrame().frame, _sync.GetLastSavedFrame().index);
 }

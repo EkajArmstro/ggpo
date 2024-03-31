@@ -28,9 +28,8 @@ public:
 protected:
    struct SavedInfo {
       int         frame;
+      int         index;
       int         checksum;
-      char        *buf;
-      int         cbuf;
       GameInput   input;
    };
 
