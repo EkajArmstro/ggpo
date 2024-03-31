@@ -61,13 +61,8 @@ typedef enum {
  *
  * If type == GGPO_PLAYERTYPE_REMOTE:
  *
- * u.remote.ip_address:  The ip address of the ggpo session which will host this
+ * u.remote.addr:  The sockaddr_in of the ggpo session which will host this
  *       player.
- *
- * u.remote.port: The port where udp packets should be sent to reach this player.
- *       All the local inputs for this session will be sent to this player at
- *       ip_address:port.
- *
  */
 
 typedef struct GGPOPlayer {
@@ -78,8 +73,7 @@ typedef struct GGPOPlayer {
       struct {
       } local;
       struct {
-         char           ip_address[32];
-         unsigned short port;
+         sockaddr_in addr;
       } remote;
    } u;
 } GGPOPlayer;
@@ -394,10 +388,8 @@ GGPO_API GGPOErrorCode __cdecl ggpo_start_synctest(GGPOSession **session,
  *
  * local_port - The port GGPO should bind to for UDP traffic.
  *
- * host_ip - The IP address of the host who will serve you the inputs for the game.  Any
+ * addr - The sockaddr_in of the host who will serve you the inputs for the game.  Any
  * player partcipating in the session can serve as a host.
- *
- * host_port - The port of the session on the host
  */
 GGPO_API GGPOErrorCode __cdecl ggpo_start_spectating(GGPOSession **session,
                                                      GGPOSessionCallbacks *cb,
@@ -405,8 +397,7 @@ GGPO_API GGPOErrorCode __cdecl ggpo_start_spectating(GGPOSession **session,
                                                      int num_players,
                                                      int input_size,
                                                      unsigned short local_port,
-                                                     char *host_ip,
-                                                     unsigned short host_port);
+                                                     sockaddr_in addr);
 
 /*
  * ggpo_close_session --

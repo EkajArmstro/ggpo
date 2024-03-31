@@ -12,8 +12,7 @@ SpectatorBackend::SpectatorBackend(GGPOSessionCallbacks *cb,
                                    uint16 localport,
                                    int num_players,
                                    int input_size,
-                                   char *hostip,
-                                   u_short hostport) :
+                                   sockaddr_in addr) :
    _num_players(num_players),
    _input_size(input_size),
    _next_input_to_send(0)
@@ -33,7 +32,7 @@ SpectatorBackend::SpectatorBackend(GGPOSessionCallbacks *cb,
    /*
     * Init the host endpoint
     */
-   _host.Init(&_udp, _poll, 0, hostip, hostport, NULL);
+   _host.Init(&_udp, _poll, 0, addr, NULL);
    _host.Synchronize();
 
    /*
@@ -41,7 +40,7 @@ SpectatorBackend::SpectatorBackend(GGPOSessionCallbacks *cb,
     */
    _callbacks.begin_game(gamename);
 }
-  
+
 SpectatorBackend::~SpectatorBackend()
 {
 }
@@ -88,7 +87,7 @@ SpectatorBackend::SyncInput(void *values,
 
 GGPOErrorCode
 SpectatorBackend::IncrementFrame(void)
-{  
+{
    Log("End of frame (%d)...\n", _next_input_to_send - 1);
    DoPoll(0);
    PollUdpProtocolEvents();
@@ -163,7 +162,7 @@ SpectatorBackend::OnUdpProtocolEvent(UdpProtocol::Event &evt)
       break;
    }
 }
- 
+
 void
 SpectatorBackend::OnMsg(sockaddr_in &from, UdpMsg *msg, int len)
 {

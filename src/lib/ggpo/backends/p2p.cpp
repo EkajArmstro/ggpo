@@ -54,30 +54,28 @@ Peer2PeerBackend::Peer2PeerBackend(GGPOSessionCallbacks *cb,
     */
    _callbacks.begin_game(gamename);
 }
-  
+
 Peer2PeerBackend::~Peer2PeerBackend()
 {
    delete [] _endpoints;
 }
 
 void
-Peer2PeerBackend::AddRemotePlayer(char *ip,
-                                  uint16 port,
+Peer2PeerBackend::AddRemotePlayer(sockaddr_in addr,
                                   int queue)
 {
    /*
     * Start the state machine (xxx: no)
     */
    _synchronizing = true;
-   
-   _endpoints[queue].Init(&_udp, _poll, queue, ip, port, _local_connect_status);
+
+   _endpoints[queue].Init(&_udp, _poll, queue, addr, _local_connect_status);
    _endpoints[queue].SetDisconnectTimeout(_disconnect_timeout);
    _endpoints[queue].SetDisconnectNotifyStart(_disconnect_notify_start);
    _endpoints[queue].Synchronize();
 }
 
-GGPOErrorCode Peer2PeerBackend::AddSpectator(char *ip,
-                                             uint16 port)
+GGPOErrorCode Peer2PeerBackend::AddSpectator(sockaddr_in addr)
 {
    if (_num_spectators == GGPO_MAX_SPECTATORS) {
       return GGPO_ERRORCODE_TOO_MANY_SPECTATORS;
@@ -90,7 +88,7 @@ GGPOErrorCode Peer2PeerBackend::AddSpectator(char *ip,
    }
    int queue = _num_spectators++;
 
-   _spectators[queue].Init(&_udp, _poll, queue + 1000, ip, port, _local_connect_status);
+   _spectators[queue].Init(&_udp, _poll, queue + 1000, addr, _local_connect_status);
    _spectators[queue].SetDisconnectTimeout(_disconnect_timeout);
    _spectators[queue].SetDisconnectNotifyStart(_disconnect_notify_start);
    _spectators[queue].Synchronize();
@@ -129,7 +127,7 @@ Peer2PeerBackend::DoPoll(int timeout)
             if (_num_spectators > 0) {
                while (_next_spectator_frame <= total_min_confirmed) {
                   Log("pushing frame %d to spectators.\n", _next_spectator_frame);
-   
+
                   GameInput input;
                   input.frame = _next_spectator_frame;
                   input.size = _input_size * _num_players;
@@ -245,7 +243,7 @@ Peer2PeerBackend::AddPlayer(GGPOPlayer *player,
                             GGPOPlayerHandle *handle)
 {
    if (player->type == GGPO_PLAYERTYPE_SPECTATOR) {
-      return AddSpectator(player->u.remote.ip_address, player->u.remote.port);
+      return AddSpectator(player->u.remote.addr);
    }
 
    int queue = player->player_num - 1;
@@ -255,7 +253,7 @@ Peer2PeerBackend::AddPlayer(GGPOPlayer *player,
    *handle = QueueToPlayerHandle(queue);
 
    if (player->type == GGPO_PLAYERTYPE_REMOTE) {
-      AddRemotePlayer(player->u.remote.ip_address, player->u.remote.port, queue);
+      AddRemotePlayer(player->u.remote.addr, queue);
    }
    return GGPO_OK;
 }
@@ -275,7 +273,7 @@ Peer2PeerBackend::AddLocalInput(GGPOPlayerHandle player,
    if (_synchronizing) {
       return GGPO_ERRORCODE_NOT_SYNCHRONIZED;
    }
-   
+
    result = PlayerHandleToQueue(player, &queue);
    if (!GGPO_SUCCEEDED(result)) {
       return result;
@@ -328,7 +326,7 @@ Peer2PeerBackend::SyncInput(void *values,
 
 GGPOErrorCode
 Peer2PeerBackend::IncrementFrame(void)
-{  
+{
    Log("End of frame (%d)...\n", _sync.GetFrameCount());
    _sync.IncrementFrame();
    DoPoll(0);
@@ -465,7 +463,7 @@ Peer2PeerBackend::DisconnectPlayer(GGPOPlayerHandle player)
    if (!GGPO_SUCCEEDED(result)) {
       return result;
    }
-   
+
    if (_local_connect_status[queue].disconnected) {
       return GGPO_ERRORCODE_PLAYER_DISCONNECTED;
    }
@@ -533,8 +531,8 @@ Peer2PeerBackend::GetNetworkStats(GGPONetworkStats *stats, GGPOPlayerHandle play
 }
 
 GGPOErrorCode
-Peer2PeerBackend::SetFrameDelay(GGPOPlayerHandle player, int delay) 
-{ 
+Peer2PeerBackend::SetFrameDelay(GGPOPlayerHandle player, int delay)
+{
    int queue;
    GGPOErrorCode result;
 
@@ -543,7 +541,7 @@ Peer2PeerBackend::SetFrameDelay(GGPOPlayerHandle player, int delay)
       return result;
    }
    _sync.SetFrameDelay(queue, delay);
-   return GGPO_OK; 
+   return GGPO_OK;
 }
 
 GGPOErrorCode
@@ -581,7 +579,7 @@ Peer2PeerBackend::PlayerHandleToQueue(GGPOPlayerHandle player, int *queue)
    return GGPO_OK;
 }
 
- 
+
 void
 Peer2PeerBackend::OnMsg(sockaddr_in &from, UdpMsg *msg, int len)
 {

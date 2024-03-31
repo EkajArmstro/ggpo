@@ -65,17 +65,14 @@ void
 UdpProtocol::Init(Udp *udp,
                   Poll &poll,
                   int queue,
-                  char *ip,
-                  u_short port,
+                  sockaddr_in addr,
                   UdpMsg::connect_status *status)
-{  
+{
    _udp = udp;
    _queue = queue;
    _local_connect_status = status;
 
-   _peer_addr.sin_family = AF_INET;
-   _peer_addr.sin_port = htons(port);
-   inet_pton(AF_INET, ip, &_peer_addr.sin_addr.s_addr);
+   _peer_addr = addr;
 
    do {
       _magic_number = (uint16)rand();
@@ -104,7 +101,7 @@ UdpProtocol::SendInput(GameInput &input)
          _pending_output.push(input);
       }
       SendPendingOutput();
-   }  
+   }
 }
 
 void
@@ -224,7 +221,7 @@ UdpProtocol::OnLoopPoll(void *cookie)
          SendMsg(new UdpMsg(UdpMsg::KeepAlive));
       }
 
-      if (_disconnect_timeout && _disconnect_notify_start && 
+      if (_disconnect_timeout && _disconnect_notify_start &&
          !_disconnect_notify_sent && (_last_recv_time + _disconnect_notify_start < now)) {
          Log("Endpoint has stopped receiving packets for %d ms.  Sending notification.\n", _disconnect_notify_start);
          Event e(Event::NetworkInterrupted);
@@ -342,7 +339,7 @@ UdpProtocol::OnMsg(UdpMsg *msg, int len)
    if (handled) {
       _last_recv_time = Platform::GetCurrentTimeMS();
       if (_disconnect_notify_sent && _current_state == Running) {
-         QueueEvent(Event(Event::NetworkResumed));   
+         QueueEvent(Event(Event::NetworkResumed));
          _disconnect_notify_sent = false;
       }
    }
@@ -366,7 +363,7 @@ UdpProtocol::UpdateNetworkStats(void)
 
    Log("Network Stats -- Bandwidth: %.2f KBps   Packets Sent: %5d (%.2f pps)   "
        "KB Sent: %.2f    UDP Overhead: %.2f %%.\n",
-       _kbps_sent, 
+       _kbps_sent,
        _packets_sent,
        (float)_packets_sent * 1000 / (now - _stats_start_time),
        total_bytes_sent / 1024.0,
@@ -467,7 +464,7 @@ bool
 UdpProtocol::OnSyncRequest(UdpMsg *msg, int len)
 {
    if (_remote_magic_number != 0 && msg->hdr.magic != _remote_magic_number) {
-      Log("Ignoring sync request from unknown endpoint (%d != %d).\n", 
+      Log("Ignoring sync request from unknown endpoint (%d != %d).\n",
            msg->hdr.magic, _remote_magic_number);
       return false;
    }

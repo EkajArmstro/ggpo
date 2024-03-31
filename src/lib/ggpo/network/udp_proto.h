@@ -63,7 +63,7 @@ public:
    UdpProtocol();
    virtual ~UdpProtocol();
 
-   void Init(Udp *udp, Poll &p, int queue, char *ip, u_short port, UdpMsg::connect_status *status);
+   void Init(Udp *udp, Poll &p, int queue, sockaddr_in addr, UdpMsg::connect_status *status);
 
    void Synchronize();
    bool GetPeerConnectStatus(int id, int *frame);
@@ -75,7 +75,7 @@ public:
    bool HandlesMsg(sockaddr_in &from, UdpMsg *msg);
    void OnMsg(UdpMsg *msg, int len);
    void Disconnect();
-  
+
    void GetNetworkStats(struct GGPONetworkStats *stats);
    bool GetEvent(UdpProtocol::Event &e);
    void GGPONetworkStats(Stats *stats);
@@ -127,7 +127,7 @@ protected:
     * Network transmission information
     */
    Udp            *_udp;
-   sockaddr_in    _peer_addr; 
+   sockaddr_in    _peer_addr;
    uint16         _magic_number;
    int            _queue;
    uint16         _remote_magic_number;
