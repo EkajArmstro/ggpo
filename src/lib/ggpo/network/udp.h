@@ -38,14 +38,11 @@ protected:
 public:
    Udp();
 
-   void Init(uint16 port, Poll *p, Callbacks *callbacks);
-   
+   void Init(SOCKET socket, Poll *p, Callbacks *callbacks);
+
    void SendTo(char *buffer, int len, int flags, struct sockaddr *dst, int destlen);
 
    virtual bool OnLoopPoll(void *cookie);
-
-public:
-   ~Udp(void);
 
 protected:
    // Network transmission information
