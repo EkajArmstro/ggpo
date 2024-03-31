@@ -30,9 +30,9 @@ extern "C" {
 #  define GGPO_API
 #endif
 
-#define GGPO_MAX_PLAYERS                  4
+#define GGPO_MAX_PLAYERS                  8
 #define GGPO_MAX_PREDICTION_FRAMES        8
-#define GGPO_MAX_SPECTATORS              32
+#define GGPO_MAX_SPECTATORS               8
 
 #define GGPO_SPECTATOR_INPUT_INTERVAL     4
 
@@ -60,7 +60,7 @@ typedef enum {
  *       In the game (e.g. in a 2 player game, either 1 or 2).
  *
  * If type == GGPO_PLAYERTYPE_REMOTE:
- * 
+ *
  * u.remote.ip_address:  The ip address of the ggpo session which will host this
  *       player.
  *
@@ -122,7 +122,7 @@ typedef enum {
  *
  * GGPO_EVENTCODE_CONNECTED_TO_PEER - Handshake with the game running on the
  * other side of the network has been completed.
- * 
+ *
  * GGPO_EVENTCODE_SYNCHRONIZING_WITH_PEER - Beginning the synchronization
  * process with the client on the other end of the networking.  The count
  * and total fields in the u.synchronizing struct of the GGPOEvent
@@ -134,7 +134,7 @@ typedef enum {
  * GGPO_EVENTCODE_RUNNING - All the clients have synchronized.  You may begin
  * sending inputs with ggpo_synchronize_inputs.
  *
- * GGPO_EVENTCODE_DISCONNECTED_FROM_PEER - The network connection on 
+ * GGPO_EVENTCODE_DISCONNECTED_FROM_PEER - The network connection on
  * the other end of the network has closed.
  *
  * GGPO_EVENTCODE_TIMESYNC - The time synchronziation code has determined
@@ -242,7 +242,7 @@ typedef struct {
     */
    bool (__cdecl *advance_frame)(int flags);
 
-   /* 
+   /*
     * on_event - Notification that something has happened.  See the GGPOEventCode
     * structure above for more information.
     */

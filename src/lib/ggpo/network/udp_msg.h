@@ -9,7 +9,7 @@
 #define _UDP_MSG_H
 
 #define MAX_COMPRESSED_BITS       4096
-#define UDP_MSG_MAX_PLAYERS          4
+#define UDP_MSG_MAX_PLAYERS          8
 
 #pragma pack(push, 1)
 
@@ -42,16 +42,16 @@ struct UdpMsg
          uint16      remote_magic;
          uint8       remote_endpoint;
       } sync_request;
-      
+
       struct {
          uint32      random_reply;    /* OK, here's your random data back */
       } sync_reply;
-      
+
       struct {
          int8        frame_advantage; /* what's the other guy's frame advantage? */
          uint32      ping;
       } quality_report;
-      
+
       struct {
          uint32      pong;
       } quality_reply;
@@ -104,4 +104,4 @@ public:
 
 #pragma pack(pop)
 
-#endif   
+#endif
